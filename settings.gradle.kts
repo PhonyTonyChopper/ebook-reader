@@ -14,5 +14,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":app")
 include(":ebookreader")
