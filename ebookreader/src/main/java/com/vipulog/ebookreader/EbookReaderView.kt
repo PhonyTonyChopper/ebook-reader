@@ -12,12 +12,12 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewClientCompat
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -35,6 +35,9 @@ class EbookReaderView : WebView {
 
     private val navigationStack = ArrayDeque<String>()
 
+    val exceptionHandler = CoroutineExceptionHandler { _, exception ->
+        listener?.onException(exception)
+    }
 
     constructor(context: Context) : super(context) {
         init()
@@ -201,21 +204,21 @@ class EbookReaderView : WebView {
 
         @JavascriptInterface
         fun onBookLoaded(bookJson: String) {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 listener?.onBookLoaded(json.decodeFromString(bookJson))
             }
         }
 
         @JavascriptInterface
         fun onBookLoadFailed(error: String) {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 listener?.onBookLoadFailed(Json.decodeFromString(error))
             }
         }
 
         @JavascriptInterface
         fun onRelocated(relocationInfoJson: String) {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 val relocationInfo: RelocationInfo = json.decodeFromString(relocationInfoJson)
                 navigationStack.add(relocationInfo.cfi)
                 listener?.onProgressChanged(relocationInfo)
@@ -224,21 +227,21 @@ class EbookReaderView : WebView {
 
         @JavascriptInterface
         fun onImageSelected(imageBase64: String) {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 listener?.onImageSelected(imageBase64)
             }
         }
 
         @JavascriptInterface
         fun onSelectionStart() {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 listener?.onTextSelectionModeChange(true)
             }
         }
 
         @JavascriptInterface
         fun onSelectionEnd() {
-            scope.launch {
+            scope.launch(exceptionHandler) {
                 listener?.onTextSelectionModeChange(false)
             }
         }

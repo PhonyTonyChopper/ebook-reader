@@ -6,4 +6,5 @@ interface EbookReaderEventListener {
     fun onProgressChanged(info: RelocationInfo)
     fun onTextSelectionModeChange(mode: Boolean)
     fun onImageSelected(base64String: String)
+    fun onException(exception: Throwable)
 }
